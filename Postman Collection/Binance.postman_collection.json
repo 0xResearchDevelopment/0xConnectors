@@ -7,53 +7,190 @@
 	},
 	"item": [
 		{
-			"name": "getTradeHistory",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "apiKey",
-						"value": "oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ",
-						"type": "text"
+			"name": "Local",
+			"item": [
+				{
+					"name": "getTradeHistory",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
 					},
-					{
-						"key": "secretKey",
-						"value": "vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O",
-						"type": "text"
-					},
-					{
-						"key": "targetEndpointUrl",
-						"value": "https://testnet.binance.vision/api/v3/myTrades",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"numberOfRows\":10,\r\n    \"tradeSymbol\":\"LINKBTC\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "apiKey",
+								"value": "oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ",
+								"type": "text"
+							},
+							{
+								"key": "secretKey",
+								"value": "vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O",
+								"type": "text"
+							},
+							{
+								"key": "targetEndpointUrl",
+								"value": "https://testnet.binance.vision/api/v3/myTrades",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"numberOfRows\":10,\r\n    \"tradeSymbol\":\"LINKBTC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/binance/getTradeHistory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"binance",
+								"getTradeHistory"
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "http://localhost:3000/api/binance/getTradeHistory",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"api",
-						"binance",
-						"getTradeHistory"
-					]
+				{
+					"name": "getTradeHistory Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "apiKey",
+								"value": "oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ",
+								"type": "text"
+							},
+							{
+								"key": "secretKey",
+								"value": "vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O",
+								"type": "text"
+							},
+							{
+								"key": "targetEndpointUrl",
+								"value": "https://testnet.binance.vision/api/v3/myTrades",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"numberOfRows\":10,\r\n    \"tradeSymbol\":\"LINKBTC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3000/api/binance/getTradeHistory",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3000",
+							"path": [
+								"api",
+								"binance",
+								"getTradeHistory"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "Cloud",
+			"item": [
+				{
+					"name": "getTradeHistory-cloud",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://wtme8uj5xk.execute-api.ap-south-1.amazonaws.com/dev/api/binance/getTradeHistory",
+							"protocol": "https",
+							"host": [
+								"wtme8uj5xk",
+								"execute-api",
+								"ap-south-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"api",
+								"binance",
+								"getTradeHistory"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getTradeHistory-cloud Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "apiKey",
+								"value": "oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ",
+								"type": "text"
+							},
+							{
+								"key": "secretKey",
+								"value": "vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O",
+								"type": "text"
+							},
+							{
+								"key": "targetEndpointUrl",
+								"value": "https://testnet.binance.vision/api/v3/myTrades",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"numberOfRows\":10,\r\n    \"tradeSymbol\":\"LINKBTC\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://esizbmhau9.execute-api.ap-south-1.amazonaws.com/dev/api/binance/getTradeHistory",
+							"protocol": "https",
+							"host": [
+								"esizbmhau9",
+								"execute-api",
+								"ap-south-1",
+								"amazonaws",
+								"com"
+							],
+							"path": [
+								"dev",
+								"api",
+								"binance",
+								"getTradeHistory"
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
