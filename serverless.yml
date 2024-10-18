@@ -20,8 +20,8 @@ functions:
       - http: ANY /
     environment:
       #  PORT: 3000
-      #  AC1CES1S_SECRET: 'Oovdgij5uV8JazTfBQ16RndJlKfTeNOzuDxjJ0ai'
-      #  AC1CES1S_KEY: 'AKIAROLD6HQTDF64WHHB'
+      #  ACCESS_SECRET: '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'
+      #  ACCESS_KEY: 'AKIAROLD6HQTDF64WHHB'
       #  REGION: 'ap-south-1'
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
