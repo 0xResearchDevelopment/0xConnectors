@@ -4,17 +4,30 @@ const { success, error, validation } = require("../../../../../helpers/responseA
 
 exports.getTradeHistory = async (req, res) => {
 
-    const apiKey = req.get('apiKey');
-    const secretKey = req.get('secretKey');
-    const targetEndpointUrl = req.get('targetEndpointUrl');
+    // const apiKey = req.get('apiKey');
+    // const secretKey = req.get('secretKey');
+    // const targetEndpointUrl = req.get('targetEndpointUrl');
 
-    const {
-        numberOfRows,
-        tradeSymbol
-    } = req.body;
+    const apiKey = 'oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ';
+    const secretKey = 'vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O';
+    const targetEndpointUrl = 'https://testnet.binance.vision/api/v3/myTrades';
+
+    console.log('targetEndpointUrl: ',  targetEndpointUrl);
+
+    // const {
+    //     numberOfRows,
+    //     tradeSymbol
+    // } = req.body;
+
+    const numberOfRows = 10;
+    const tradeSymbol = 'LINKBTC';
+
+    console.log('tradeSymbol: ',  tradeSymbol);
 
     const timestamp = Date.now(); // Get current timestamp
     const queryString = `symbol=${tradeSymbol}&timestamp=${timestamp}&limit=${numberOfRows}`;
+
+    console.log('queryString: ',  queryString);
 
     // Sign the request
     const signature = crypto.createHmac('sha256', secretKey).update(queryString).digest('hex');
@@ -100,5 +113,25 @@ exports.getTradeHistory = async (req, res) => {
             message: `Error fetching trade history:', ${error.response ? error.response.data : error.message}`,
         });
         console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
+    }
+}
+
+exports.getHello = async (req, res) => {
+    try {
+        console.log('Welcome to connectors 2');
+
+        res.send({
+            statusCode: res.statusCode,
+            statusMessage: 'success',
+            message: 'Welcome to connectors 2',
+        });
+
+    } catch (error) {
+        res.send({
+            statusCode: res.statusCode,
+            statusMessage: 'error',
+            message: `Error in hello:', ${error.response ? error.response.data : error.message}`,
+        });
+        console.error('Error in hello:', error.response ? error.response.data : error.message);
     }
 }

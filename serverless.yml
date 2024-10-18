@@ -19,10 +19,10 @@ functions:
       - http: ANY /{proxy+}
       - http: ANY /
     environment:
-      #  PORT: 3000
-      #  ACCESS_SECRET: 'Oovdgij5uV8JazTfBQ16RndJlKfTeNOzuDxjJ0ai'
-      #  ACCESS_KEY: 'AKIAROLD6HQTDF64WHHB'
-      #  REGION: 'ap-south-1'
+       PORT: 3000
+       ACCESS_SECRET: 'Oovdgij5uV8JazTfBQ16RndJlKfTeNOzuDxjJ0ai'
+       ACCESS_KEY: 'AKIAROLD6HQTDF64WHHB'
+       REGION: 'ap-south-1'
 #      - websocket: $connect
 #      - s3: ${env:BUCKET}
 #      - schedule: rate(10 minutes)

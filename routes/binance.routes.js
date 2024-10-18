@@ -6,4 +6,6 @@ const binanceController = require("../src/main/connectors/binance/controllers/bi
 // Routes
 router.get("/getTradeHistory", binanceController.getTradeHistory);
 
+router.get("/hello", binanceController.getHello);
+
 module.exports = router;
