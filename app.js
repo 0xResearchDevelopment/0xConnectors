@@ -24,4 +24,4 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).send('Something went wrong!')
 })
 
-app.listen(port, () => console.log(`SUCESS: Server started at :${port}`))
+module.exports = app;
