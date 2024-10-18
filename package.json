@@ -2,16 +2,31 @@
   "name": "0xconnectors",
   "version": "1.0.0",
   "description": "0xConnectors",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "server": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Sadish",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.7",
     "crypto": "^1.0.1",
-    "crypto-js": "^4.2.0"
-  }
+    "crypto-js": "^4.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-async-errors": "^3.1.1",
+    "express-validator": "^6.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xResearchDevelopment/0xConnectors.git"
+  },
+  "bugs": {
+    "url": "https://github.com/0xResearchDevelopment/0xConnectors/issues"
+  },
+  "homepage": "https://github.com/0xResearchDevelopment/0xConnectors#readme"
 }
