@@ -1,0 +1,17 @@
+{
+  "name": "0xconnectors",
+  "version": "1.0.0",
+  "description": "0xConnectors",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "crypto": "^1.0.1",
+    "crypto-js": "^4.2.0"
+  }
+}
