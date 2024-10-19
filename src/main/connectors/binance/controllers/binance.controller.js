@@ -118,12 +118,12 @@ exports.getTradeHistory = async (req, res) => {
 
 exports.getHello = async (req, res) => {
     try {
-        console.log('Welcome to connectors 2');
+        console.log('===> inside hello() : Welcome to connectors - 3');
 
         res.send({
             statusCode: res.statusCode,
             statusMessage: 'success',
-            message: 'Welcome to connectors 2',
+            message: 'Welcome to connectors - 3',
         });
 
     } catch (error) {
