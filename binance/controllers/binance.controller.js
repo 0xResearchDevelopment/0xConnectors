@@ -4,12 +4,13 @@ const os = require('os');
 const { success, error, validation } = require("../helpers/responseApi");
 
 exports.getHello = async (req, res) => {
-    console.log('===> Inside getHello() : Welocme to 0xConnectors');
+    let versiontest = "(20241020-2130)";
+    console.log('===> Inside getHello() : Welocme to 0xConnectors ', versiontest);
     try {
         res.send({
             statusCode: res.statusCode,
             statusMessage: 'success',
-            message: 'Successfully connected to hello'
+            message: 'Successfully connected to hello :' + versiontest
         });
     } catch (error) {
         res.send({
