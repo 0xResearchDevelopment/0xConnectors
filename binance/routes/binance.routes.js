@@ -4,7 +4,7 @@ const router = require("express").Router();
 const binanceController = require("../controllers/binance.controller.js");
 
 // Routes
-router.get("/tradehistory", binanceController.getTradeHistory);
+router.post("/tradehistory", binanceController.getTradeHistory);
 router.get("/hello", binanceController.getHello);
 
 module.exports = router;

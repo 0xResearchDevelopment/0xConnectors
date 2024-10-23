@@ -4,7 +4,8 @@ const os = require('os');
 const { success, error, validation } = require("../helpers/responseApi");
 
 exports.getHello = async (req, res) => {
-    let versiontest = "(20241023-0150)";
+    let ipaddress = getIPAddress();
+    let versiontest = "(20241023-0251) : " + ipaddress;
     console.log('===> Inside getHello() : Welocme to 0xConnectors ', versiontest);
     try {
         res.send({
@@ -51,10 +52,10 @@ exports.getTradeHistory = async (req, res) => {
         console.log('x-mbx-apiKey:' , apiKey);
         console.log('x-mbx-secretkey:' , secretKey);
         console.log('target-endpoint-url:' , targetEndpointUrl);
-        const {
-             numberOfRows,
-             tradeSymbol
-        } = req.body;
+
+        // Extracting values from request body
+        const tradeSymbol = req.body.tradeSymbol; //|| "LINKBTC"; // Default to "LINKBTC" if not provided
+        const numberOfRows = req.body.numberOfRows; //|| 10; // Default to 10 if not provided
 
         console.log('===> Trade Symbol:', tradeSymbol);
         console.log('===> Number of Rows:', numberOfRows);
@@ -131,7 +132,7 @@ exports.getTradeHistory = async (req, res) => {
             tradeHistory: averageTrades
         }
 
-        res.send({
+        res.json({
             statusCode: res.statusCode,
             statusMessage: 'success',
             message: 'Successfully retrieved trade history data',
@@ -139,11 +140,11 @@ exports.getTradeHistory = async (req, res) => {
         });
 
     } catch (error) {
-        res.send({
+        console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
+        res.status(500).json({
             statusCode: res.statusCode,
             statusMessage: 'error',
             message: `Error fetching trade history:', ${error.response ? error.response.data : error.message}`,
         });
-        console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
     }
 }
