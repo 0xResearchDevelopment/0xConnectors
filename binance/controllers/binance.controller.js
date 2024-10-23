@@ -23,8 +23,6 @@ exports.getHello = async (req, res) => {
     }
 }
 
-
-
 function getIPAddress() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
@@ -35,7 +33,6 @@ function getIPAddress() {
     }
   }
 }
-
 
 exports.getTradeHistory = async (req, res) => {
     try {
