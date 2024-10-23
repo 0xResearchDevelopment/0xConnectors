@@ -38,21 +38,25 @@ function getIPAddress() {
 exports.getTradeHistory = async (req, res) => {
     try {
         console.log('===> Inside getTradeHistory()');
+        console.log('===> Request Headers:', req.headers);
 
         let ipaddress = getIPAddress();
         console.log('===> Server IP Address:', ipaddress);
 
-        const apiKey = 'oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ'; //req.get('apiKey');
-        const secretKey = 'vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O'; //req.get('secretKey');
-        const targetEndpointUrl = "https://testnet.binance.vision/api/v3/myTrades"; //req.get('targetEndpointUrl');
+        const apiKey = req.headers['x-mbx-apikey'];
+        const secretKey = req.headers['x-mbx-secretkey'];
+        const targetEndpointUrl = req.headers['target-endpoint-url'];
 
-        // const {
-        //     numberOfRows,
-        //     tradeSymbol
-        // } = req.body;
+        console.log('x-mbx-apiKey:' , apiKey);
+        console.log('x-mbx-secretkey:' , secretKey);
+        console.log('target-endpoint-url:' , targetEndpointUrl);
+        const {
+             numberOfRows,
+             tradeSymbol
+        } = req.body;
 
-        const tradeSymbol = "LINKBTC";
-        const numberOfRows = 10;
+        console.log('===> Trade Symbol:', tradeSymbol);
+        console.log('===> Number of Rows:', numberOfRows);
 
         const timestamp = Date.now(); // Get current timestamp
         const queryString = `symbol=${tradeSymbol}&timestamp=${timestamp}&limit=${numberOfRows}`;
@@ -69,7 +73,6 @@ exports.getTradeHistory = async (req, res) => {
 
         //console.log(headers, 'headers');
 
-
         const response = await axios.get(targetEndpointUrl, {
             headers: headers,
             params: {
@@ -80,7 +83,7 @@ exports.getTradeHistory = async (req, res) => {
             },
         });
 
-        console.log(response, 'response');
+        //console.log(response, 'response');
 
         // Group trades by orderId and calculate average price
         const trades = response.data;
@@ -118,7 +121,7 @@ exports.getTradeHistory = async (req, res) => {
             };
         });
 
-        console.log(`Last ${numberOfRows} trades for ${tradeSymbol} grouped by orderId:`);
+        console.log(`===> Last ${numberOfRows} trades for ${tradeSymbol} grouped by orderId:`);
         console.log(averageTrades);
 
         const tradeHistoryData = {
