@@ -22,7 +22,7 @@ const queries = {
                         and botProfile.BOT_EXCHANGE = ? and upper(botProfile.BOT_TIMEFRAME) = upper(?)
                         and authProfile.EMAIL_ID = userSubscribed.EMAIL_ID and authProfile.STATUS = 1
                         order by userSubscribed.EMAIL_ID;`,
-    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)'
+    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
   };
 
 module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, tradeTimeframe) => {
@@ -34,12 +34,12 @@ module.exports.addTradeData = async (tradeObj) => {
     const [record] = await db.query(queries.INSERT_TRADE_DATA,
         [tradeObj.emailId, tradeObj.botSymbol, tradeObj.botExchange, tradeObj.botTimeframe, tradeObj.botName, 
         tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
-        tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus])
+        tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
     return record;
 }
 
 // Main function to execute trade
-module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol, quantity, side) => {
+module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction) => {
     // Step 1: Get the current order book depth
     const orderBookDepth = await getOrderBookDepth(endpointBaseUrl, symbol);
     if (!orderBookDepth) return; // Exit if unable to fetch order book depth
@@ -52,6 +52,8 @@ module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol,
     let limitPrice;
     // Round the limit price to the nearest tick size
     let roundedLimitPrice;
+    //Setting the side based on trade action
+    let side = (tradeAction === 'B') ? 'BUY' : 'SELL';
 
     //Calculate limit price
     const tickSize = parseFloat(symbolInfo.filters.find(f => f.filterType === 'PRICE_FILTER').tickSize);

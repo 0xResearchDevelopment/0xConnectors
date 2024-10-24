@@ -48,15 +48,14 @@ exports.signalInput = async (req, res) => {
                     tradeSlippage: signal.TRADE_SLIPPAGE,
                     tradeQuantity: signal.TRADE_QUANTITY,
                     tradeAction: executeTradeRes.side,
-                    tickerPrice: executeTradeRes.price,
+                    tickerPrice: executeTradeRes.fills[0].price,
                     tradeConfirmationJSON: JSON.stringify(executeTradeRes),
-                    tradeStatus: 1
+                    tradeStatus: 1,
+                    orderId: executeTradeRes.orderId,
+                    orderType: executeTradeRes.type
                 };
 
                 console.log('###tradeObj###: ', tradeObj);
-
-                console.log('###executeTradeRes STRINGIFY###: ', JSON.stringify(executeTradeRes));
-
 
                 const res = await tradeService.addTradeData(tradeObj);
                 console.log('###final response###: ', res);
@@ -65,11 +64,11 @@ exports.signalInput = async (req, res) => {
 
         //########To Do: Sending a success response after execute trade API call and insert table operation
 
-        // res.send({
-        //     statusCode: res.statusCode,
-        //     statusMessage: 'success',
-        //     message: 'Successfully processed the signals',
-        // });
+        res.send({
+            statusCode: res.statusCode,
+            statusMessage: 'success',
+            message: 'Successfully processed the signals',
+        });
 
     } catch (error) {
         console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
