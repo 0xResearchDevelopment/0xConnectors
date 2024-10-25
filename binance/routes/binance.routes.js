@@ -7,4 +7,6 @@ const binanceController = require("../controllers/binance.controller.js");
 router.post("/tradehistory", binanceController.getTradeHistory);
 router.get("/hello", binanceController.getHello);
 
+router.post("/getBalance", binanceController.getBalance);
+
 module.exports = router;
