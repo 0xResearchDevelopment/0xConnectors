@@ -4,7 +4,8 @@ const os = require('os');
 const { success, error, validation } = require("../helpers/responseApi");
 
 exports.getHello = async (req, res) => {
-    let versiontest = "(20241020-2130)";
+    let ipaddress = getIPAddress();
+    let versiontest = "(20241023-0251) : " + ipaddress;
     console.log('===> Inside getHello() : Welocme to 0xConnectors ', versiontest);
     try {
         res.send({
@@ -36,21 +37,25 @@ function getIPAddress() {
 exports.getTradeHistory = async (req, res) => {
     try {
         console.log('===> Inside getTradeHistory()');
+        console.log('===> Request Headers:', req.headers);
 
         let ipaddress = getIPAddress();
         console.log('===> Server IP Address:', ipaddress);
 
-        const apiKey = 'oS1UaFODwH7tGrpYRvsX1BD3ETjDZYcGD1lTUp3u3dtMlbIOAnIDsow5MKpF7uDQ'; //req.get('apiKey');
-        const secretKey = 'vTx3T7BGkFPgJrwxTVLLxMQOLYCYWah92jWnwdL54HUuaTBEKcsctlNiAJiE8h3O'; //req.get('secretKey');
-        const targetEndpointUrl = "https://testnet.binance.vision/api/v3/myTrades"; //req.get('targetEndpointUrl');
+        const apiKey = req.headers['x-mbx-apikey'];
+        const secretKey = req.headers['x-mbx-secretkey'];
+        const targetEndpointUrl = req.headers['target-endpoint-url'];
 
-        // const {
-        //     numberOfRows,
-        //     tradeSymbol
-        // } = req.body;
+        console.log('x-mbx-apiKey:' , apiKey);
+        console.log('x-mbx-secretkey:' , secretKey);
+        console.log('target-endpoint-url:' , targetEndpointUrl);
 
-        const tradeSymbol = "LINKBTC";
-        const numberOfRows = 10;
+        // Extracting values from request body
+        const tradeSymbol = req.body.tradeSymbol; //|| "LINKBTC"; // Default to "LINKBTC" if not provided
+        const numberOfRows = req.body.numberOfRows; //|| 10; // Default to 10 if not provided
+
+        console.log('===> Trade Symbol:', tradeSymbol);
+        console.log('===> Number of Rows:', numberOfRows);
 
         const timestamp = Date.now(); // Get current timestamp
         const queryString = `symbol=${tradeSymbol}&timestamp=${timestamp}&limit=${numberOfRows}`;
@@ -67,7 +72,6 @@ exports.getTradeHistory = async (req, res) => {
 
         //console.log(headers, 'headers');
 
-
         const response = await axios.get(targetEndpointUrl, {
             headers: headers,
             params: {
@@ -78,7 +82,7 @@ exports.getTradeHistory = async (req, res) => {
             },
         });
 
-        console.log(response, 'response');
+        //console.log(response, 'response');
 
         // Group trades by orderId and calculate average price
         const trades = response.data;
@@ -116,7 +120,7 @@ exports.getTradeHistory = async (req, res) => {
             };
         });
 
-        console.log(`Last ${numberOfRows} trades for ${tradeSymbol} grouped by orderId:`);
+        console.log(`===> Last ${numberOfRows} trades for ${tradeSymbol} grouped by orderId:`);
         console.log(averageTrades);
 
         const tradeHistoryData = {
@@ -125,7 +129,7 @@ exports.getTradeHistory = async (req, res) => {
             tradeHistory: averageTrades
         }
 
-        res.send({
+        res.json({
             statusCode: res.statusCode,
             statusMessage: 'success',
             message: 'Successfully retrieved trade history data',
@@ -133,12 +137,12 @@ exports.getTradeHistory = async (req, res) => {
         });
 
     } catch (error) {
-        res.send({
+        console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
+        res.status(500).json({
             statusCode: res.statusCode,
             statusMessage: 'error',
             message: `Error fetching trade history:', ${error.response ? error.response.data : error.message}`,
         });
-        console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
     }
 }
 

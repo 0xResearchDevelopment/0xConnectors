@@ -5,6 +5,7 @@ const express = require("express");
 const cors = require('cors')
 const app = express();
 const bodyparser = require('body-parser');
+process.env.TZ = "America/New_York"
 
 const port = process.env.PORT;
 
@@ -18,7 +19,7 @@ app.use(express.json({ extended: false }));
 app.use(bodyparser.json())
 app.use((err, req, res, next) => {
     console.log(err)
-    res.status(err.status || 500).send('Internal server error..')
+    res.status(err.status || 500).send('0xConnectors : Internal server error..')
 })
 
 // Routes
