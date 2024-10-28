@@ -14,14 +14,15 @@ app.use(cors())
 // Accept incoming request
 app.use(express.json({ extended: false }));
 
-// Routes
-app.use("/api/binance/v1", require("./binance/routes/binance.routes"));
-
 //middleware
 app.use(bodyparser.json())
 app.use((err, req, res, next) => {
     console.log(err)
     res.status(err.status || 500).send('Internal server error..')
 })
+
+// Routes
+app.use("/api/binance/v1", require("./binance/routes/binance.routes"));
+app.use("/api/trade/v1", require("./trades/routes/trade.routes"));
 
 module.exports = app;

@@ -22,8 +22,6 @@ exports.getHello = async (req, res) => {
     }
 }
 
-
-
 function getIPAddress() {
   const interfaces = os.networkInterfaces();
   for (const name of Object.keys(interfaces)) {
@@ -34,7 +32,6 @@ function getIPAddress() {
     }
   }
 }
-
 
 exports.getTradeHistory = async (req, res) => {
     try {
@@ -142,5 +139,81 @@ exports.getTradeHistory = async (req, res) => {
             message: `Error fetching trade history:', ${error.response ? error.response.data : error.message}`,
         });
         console.error('Error fetching trade history:', error.response ? error.response.data : error.message);
+    }
+}
+
+exports.getBalance = async (req, res) => {
+    try {
+        console.log('===> Inside getBalance()');
+        console.log('===> Request Headers:', req.headers);
+
+        const apiKey = req.headers['x-mbx-apikey'];
+        const secretKey = req.headers['x-mbx-secretkey'];
+        const targetEndpointUrl = req.headers['target-endpoint-url'];
+
+        console.log('x-mbx-apiKey:' , apiKey);
+        console.log('x-mbx-secretkey:' , secretKey);
+        console.log('target-endpoint-url:' , targetEndpointUrl);
+
+        // Extracting values from request body
+        const tradeSymbol = req.body.tradeSymbol; //|| "LINKBTC"; // Default to "LINKBTC" if not provided
+
+        console.log('===> Trade Symbol:', tradeSymbol);
+
+        const timestamp = Date.now(); // Get current timestamp
+        const queryString = `timestamp=${timestamp}`;
+
+        // Sign the request
+        const signature = crypto.createHmac('sha256', secretKey).update(queryString).digest('hex');
+
+        console.log(signature, 'signature');
+
+        // Set headers
+        const headers = {
+            'X-MBX-APIKEY': apiKey,
+        };
+
+        //console.log(headers, 'headers');
+
+        const response = await axios.get(targetEndpointUrl, {
+            headers: headers,
+            params: {
+                timestamp: timestamp,
+                signature: signature,
+            },
+        });
+
+        // Retrieve account information including balances
+        const accountInfo = response?.data ? response.data : null;
+
+        if (accountInfo) {
+            const balance = accountInfo.balances.find(b => b.asset === tradeSymbol.toUpperCase());
+
+            if (balance) {
+                console.log(`Balance for ${tradeSymbol}: ${balance.free} (free) | ${balance.locked} (locked)`);
+                res.json({
+                    statusCode: res.statusCode,
+                    statusMessage: 'success',
+                    message: `Balance for ${tradeSymbol}: ${balance.free} (free) | ${balance.locked} (locked)`,
+                    freeBalance: balance.free,
+                    lockedBalance: balance.locked
+                });
+            } else {
+                console.log(`No balance found for ${tradeSymbol}`);
+                res.json({
+                    statusCode: res.statusCode,
+                    statusMessage: 'success',
+                    message: `No balance found for ${tradeSymbol}`
+                });
+            }
+        }
+
+    } catch (error) {
+        console.error('Error fetching balance: ', error.response ? error.response.data : error.message);
+        res.status(500).json({
+            statusCode: res.statusCode,
+            statusMessage: 'error',
+            message: `Error fetching balance:', ${error.response ? error.response.data : error.message}`,
+        });
     }
 }
