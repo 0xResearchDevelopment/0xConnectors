@@ -5,7 +5,7 @@ const { success, error, validation } = require("../helpers/responseApi");
 
 exports.getHello = async (req, res) => {
     let ipaddress = getIPAddress();
-    let versiontest = "(20241023-0251) : " + ipaddress;
+    let versiontest = "(20241120-1830) : " + ipaddress;
     console.log('===> Inside getHello() : Welocme to 0xConnectors ', versiontest);
     try {
         res.send({

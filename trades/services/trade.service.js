@@ -22,8 +22,9 @@ const queries = {
                         and botProfile.BOT_EXCHANGE = ? and upper(botProfile.BOT_TIMEFRAME) = upper(?)
                         and authProfile.EMAIL_ID = userSubscribed.EMAIL_ID and authProfile.STATUS = 1
                         order by userSubscribed.EMAIL_ID;`,
-    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
-  };
+    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+    INSERT_SIGNAL_CAPTURE_DATA: 'INSERT INTO DBD_TBL_SIGNAL_CAPTURE(BOT_SYMBOL, BOT_TIMEFRAME, BOT_EXCHANGE, BOT_NAME, EMAIL_ID, API_KEY, API_SECRET, TRADE_SLIPPAGE, TRADE_QUANTITY, ENDPOINT_STATUS, ENDPOINT_URL, TRADE_ACTION, TO_BE_EXECUTED) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
+};
 
 module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, tradeTimeframe) => {
     const [record] = await db.query(queries.GET_SIGNAL_INPUT, [tradeAction, tradeSymbol, platform, tradeTimeframe])
@@ -35,6 +36,19 @@ module.exports.addTradeData = async (tradeObj) => {
         [tradeObj.emailId, tradeObj.botSymbol, tradeObj.botExchange, tradeObj.botTimeframe, tradeObj.botName, 
         tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
         tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
+    return record;
+}
+
+module.exports.addSignalCaptureData = async (signalCaptureObj) => {
+    console.log(' ====>   inside addSignalCaptureData ');
+    const [record] = await db.query(queries.INSERT_SIGNAL_CAPTURE_DATA,
+        [signalCaptureObj.botSymbol, signalCaptureObj.botTimeframe, signalCaptureObj.botExchange, 
+            signalCaptureObj.botName, signalCaptureObj.emailId, signalCaptureObj.apiKey, 
+            signalCaptureObj.apiSecret, signalCaptureObj.tradeSlippage, 
+            signalCaptureObj.tradeQuantity, signalCaptureObj.endpointStatus, 
+            signalCaptureObj.endpointURL, signalCaptureObj.tradeAction,
+            signalCaptureObj.toBeExecuted])
+    console.log(' ====>   inside addSignalCaptureData record: ', record)
     return record;
 }
 
