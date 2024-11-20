@@ -118,7 +118,7 @@ exports.signalInputDirect = async (req, res) => {
         await signals.forEach(async signal => {
 
             console.log('inside getOrderBookDepth');
-
+            
             console.log('getOrderBookDepth params ', signal.ENDPOINT_URL + '/api/v3/depth', signal.BOT_SYMBOL);
             const response = await axios.get(signal.ENDPOINT_URL + '/api/v3/depth', {
                 params: { symbol: signal.BOT_SYMBOL.toUpperCase() }
@@ -330,6 +330,117 @@ exports.signalInputDirect = async (req, res) => {
             statusCode: res.statusCode,
             statusMessage: 'error',
             message: `Error fetching trade history:', ${error.response ? error.response.data : error.message}`,
+        });
+    }
+}
+
+exports.signalInputCapture = async (req, res) => {
+    try {
+        console.log('===> Inside signalInputCapture()');
+
+        // Extracting values from request body
+        const platform = req.body.platform;
+        const clientIdCode = req.body.clientIdCode;
+        const clientEmail = req.body.clientEmail;
+        const tradeTimeframe = req.body.tradeTimeframe; 
+        const baseCurrencyCode = req.body.baseCurrencyCode;
+        const tokenCurrenyCode = req.body.tokenCurrenyCode; 
+        const tradeSymbol = req.body.tradeSymbol;
+        const allowSimulationFlag = req.body.allowSimulationFlag; 
+        const tradeAction = req.body.tradeAction;  
+
+        console.log('===> Trade Symbol:', tradeSymbol);
+        console.log('===> Platform:', platform);
+        console.log('===> Trade Action:', tradeAction);
+        console.log('===> Trade Timeframe:', tradeTimeframe);
+
+        const signals = await tradeService.getSignalInput(tradeAction, tradeSymbol, platform, tradeTimeframe)
+
+        console.log('===> Signal Input Response:', signals);
+
+        if(!signals) {
+            res.status(500).json({
+                statusCode: res.statusCode,
+                statusMessage: 'error',
+                message: `Error fetching signal input data.`,
+            });
+        }
+
+        //Executing trades based on the received signal response
+        signals.forEach(async signal => {
+            // const executeTradeRes = await tradeService.executeTrade(signal.API_KEY, signal.API_SECRET, signal.ENDPOINT_URL, signal.BOT_SYMBOL, signal.TRADE_QUANTITY, signal.TRADE_ACTION)
+            let signalCaptureObj = {
+                botSymbol: signal.BOT_SYMBOL,
+                botTimeframe: signal.BOT_TIMEFRAME,
+                botExchange: signal.BOT_EXCHANGE,
+                botName: signal.BOT_NAME,
+                emailId: signal.EMAIL_ID,
+                apiKey: signal.API_KEY,
+                apiSecret: signal.API_SECRET,
+                tradeSlippage: signal.TRADE_SLIPPAGE,
+                tradeQuantity: signal.TRADE_QUANTITY,
+                endpointStatus: signal.ENDPOINT_STATUS,
+                endpointURL: signal.ENDPOINT_URL,
+                tradeAction: signal.TRADE_ACTION,
+                toBeExecuted: 1
+            };
+
+            console.log('###signalCaptureObj###: ', signalCaptureObj);
+
+            const res = await tradeService.addSignalCaptureData(signalCaptureObj);
+            console.log('###final response###: ', res);
+        });
+
+        //########To Do: Sending a success response after execute trade API call and insert table operation
+
+        res.send({
+            statusCode: res.statusCode,
+            statusMessage: 'success',
+            message: 'Successfully captured the signals',
+        });
+
+    } catch (error) {
+        console.error('Error capturing the signals:', error.response ? error.response.data : error.message);
+        res.status(500).json({
+            statusCode: res.statusCode,
+            statusMessage: 'error',
+            message: `Error capturing the signals:', ${error.response ? error.response.data : error.message}`,
+        });
+    }
+}
+
+exports.fetchAPITest = async (req, res) => {
+    try {
+        console.log('===> Inside fetchAPITest()');
+
+        const baseUrl = 'https://testnet.binance.vision/api/v3/depth';
+        const queryParams = {
+            symbol: 'ARBBTC'        
+        };
+
+        const url = new URL(baseUrl);
+        Object.keys(queryParams).forEach(key => url.searchParams.append(key, queryParams[key]));
+        
+        console.log('fetch url: ', url);
+
+        const result = await fetch(url);
+
+        const fecthAPIres = await result.json();
+
+        console.log('fecthAPIres: ', fecthAPIres);
+
+        res.send({
+            statusCode: res.statusCode,
+            statusMessage: 'success',
+            message: 'Successfully tested fetch api',
+        });
+
+    } catch (error) {
+        console.error('Error fetch api test:', error.response ? error.response.data : error.message);
+        res.status(500).json({
+            statusCode: res.statusCode,
+            statusMessage: 'error',
+            message: `Error fetch api test:', ${error.response ? error.response.data : error.message}`,
         });
     }
 }
