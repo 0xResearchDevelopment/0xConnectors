@@ -5,8 +5,5 @@ const tradesController = require("../controllers/trade.controller.js");
 
 // Routes
 router.post("/signalinput", tradesController.signalInput);
-router.post("/signalinputdirect", tradesController.signalInputDirect);
-router.post("/signalinputcapture", tradesController.signalInputCapture);
-router.post("/fetchapitest", tradesController.fetchAPITest);
 
 module.exports = router;

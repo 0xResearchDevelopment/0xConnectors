@@ -23,7 +23,6 @@ const queries = {
                         and authProfile.EMAIL_ID = userSubscribed.EMAIL_ID and authProfile.STATUS = 1
                         order by userSubscribed.EMAIL_ID;`,
     INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    INSERT_SIGNAL_CAPTURE_DATA: 'INSERT INTO DBD_TBL_SIGNAL_CAPTURE(BOT_SYMBOL, BOT_TIMEFRAME, BOT_EXCHANGE, BOT_NAME, EMAIL_ID, API_KEY, API_SECRET, TRADE_SLIPPAGE, TRADE_QUANTITY, ENDPOINT_STATUS, ENDPOINT_URL, TRADE_ACTION, TO_BE_EXECUTED) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
 };
 
 module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, tradeTimeframe) => {
@@ -34,24 +33,15 @@ module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, trade
 module.exports.addTradeData = async (tradeObj) => {
     const [record] = await db.query(queries.INSERT_TRADE_DATA,
         [tradeObj.emailId, tradeObj.botSymbol, tradeObj.botExchange, tradeObj.botTimeframe, tradeObj.botName, 
-            tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
-            tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
-    return record;
-}
-
-module.exports.addSignalCaptureData = async (signalCaptureObj) => {
-    const [record] = await db.query(queries.INSERT_SIGNAL_CAPTURE_DATA,
-        [signalCaptureObj.botSymbol, signalCaptureObj.botTimeframe, signalCaptureObj.botExchange, 
-            signalCaptureObj.botName, signalCaptureObj.emailId, signalCaptureObj.apiKey, 
-            signalCaptureObj.apiSecret, signalCaptureObj.tradeSlippage, 
-            signalCaptureObj.tradeQuantity, signalCaptureObj.endpointStatus, 
-            signalCaptureObj.endpointURL, signalCaptureObj.tradeAction,
-            signalCaptureObj.toBeExecuted])
+        tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
+        tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
     return record;
 }
 
 // Main function to execute trade
 module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction) => {
+    console.log('inside executeTrade ===> ', apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction);
+
     // Step 1: Get the current order book depth
     const orderBookDepth = await getOrderBookDepth(endpointBaseUrl, symbol);
     if (!orderBookDepth) return; // Exit if unable to fetch order book depth
@@ -92,9 +82,11 @@ module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol,
 
     const orderId = limitOrderResponse.orderId;
 
-    // Step 4: Wait for 10 seconds
+    // Step 4: Wait for some delay seconds
     console.log('Waiting for 10 seconds to check order status...');
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    //await new Promise(resolve => setTimeout(resolve, 10000));
+    await delayFunction()
+    console.log('Waited for 10 seconds...');
 
     // Step 5: Check the order status
     const orderStatus = await checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, orderId);
@@ -140,6 +132,8 @@ async function getOrderBookDepth(endpointBaseUrl, symbol) {
 
 // Function to get symbol info
 async function getSymbolInfo(endpointBaseUrl, symbol) {
+    console.log('inside getSymbolInfo');
+
     const BINANCE_TESTNET_API_URL = endpointBaseUrl + '/api/v3/exchangeInfo';
 
     try {
@@ -159,6 +153,8 @@ async function getSymbolInfo(endpointBaseUrl, symbol) {
 
 // Function to place a limit order
 async function placeLimitOrder(apiKey, apiSecret, endpointOrderUrl, symbol, quantity, price, side) {
+    console.log('inside placeLimitOrder');
+
     const timestamp = Date.now();
     const queryString = `symbol=${symbol}&side=${side}&type=LIMIT&quantity=${quantity}&price=${price}&timeInForce=GTC&timestamp=${timestamp}`;
 
@@ -193,6 +189,8 @@ async function placeLimitOrder(apiKey, apiSecret, endpointOrderUrl, symbol, quan
 
 // Function to check the order status
 async function checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, orderId) {
+    console.log('inside checkOrderStatus');
+
     const timestamp = Date.now();
     const queryString = `symbol=${symbol}&orderId=${orderId}&timestamp=${timestamp}`;
 
@@ -222,6 +220,7 @@ async function checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, ord
 
 // Function to cancel an order
 async function cancelOrder(apiKey, apiSecret, endpointOrderUrl, symbol, orderId) {
+    console.log('inside checkOrderStatus')
     const timestamp = Date.now();
     const queryString = `symbol=${symbol}&orderId=${orderId}&timestamp=${timestamp}`;
 
@@ -250,6 +249,8 @@ async function cancelOrder(apiKey, apiSecret, endpointOrderUrl, symbol, orderId)
 
 // Function to place a market order
 async function placeMarketOrder(apiKey, apiSecret, endpointOrderUrl, symbol, quantity, side) {
+    console.log('inside placeMarketOrder');
+
     const timestamp = Date.now();
     const queryString = `symbol=${symbol}&side=${side}&type=MARKET&quantity=${quantity}&timestamp=${timestamp}`;
 
@@ -278,6 +279,10 @@ async function placeMarketOrder(apiKey, apiSecret, endpointOrderUrl, symbol, qua
         console.error('Error placing market order:', error.response ? error.response.data : error.message);
         return null;
     }
+}
+
+async function delayFunction() {
+    await new Promise(resolve => setTimeout(resolve, 10000));
 }
 
 
