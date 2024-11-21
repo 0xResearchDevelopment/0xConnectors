@@ -23,7 +23,6 @@ const queries = {
                         and authProfile.EMAIL_ID = userSubscribed.EMAIL_ID and authProfile.STATUS = 1
                         order by userSubscribed.EMAIL_ID;`,
     INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    INSERT_SIGNAL_CAPTURE_DATA: 'INSERT INTO DBD_TBL_SIGNAL_CAPTURE(BOT_SYMBOL, BOT_TIMEFRAME, BOT_EXCHANGE, BOT_NAME, EMAIL_ID, API_KEY, API_SECRET, TRADE_SLIPPAGE, TRADE_QUANTITY, ENDPOINT_STATUS, ENDPOINT_URL, TRADE_ACTION, TO_BE_EXECUTED) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
 };
 
 module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, tradeTimeframe) => {
@@ -36,19 +35,6 @@ module.exports.addTradeData = async (tradeObj) => {
         [tradeObj.emailId, tradeObj.botSymbol, tradeObj.botExchange, tradeObj.botTimeframe, tradeObj.botName, 
         tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
         tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
-    return record;
-}
-
-module.exports.addSignalCaptureData = async (signalCaptureObj) => {
-    console.log(' ====>   inside addSignalCaptureData ');
-    const [record] = await db.query(queries.INSERT_SIGNAL_CAPTURE_DATA,
-        [signalCaptureObj.botSymbol, signalCaptureObj.botTimeframe, signalCaptureObj.botExchange, 
-            signalCaptureObj.botName, signalCaptureObj.emailId, signalCaptureObj.apiKey, 
-            signalCaptureObj.apiSecret, signalCaptureObj.tradeSlippage, 
-            signalCaptureObj.tradeQuantity, signalCaptureObj.endpointStatus, 
-            signalCaptureObj.endpointURL, signalCaptureObj.tradeAction,
-            signalCaptureObj.toBeExecuted])
-    console.log(' ====>   inside addSignalCaptureData record: ', record)
     return record;
 }
 
@@ -96,9 +82,11 @@ module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol,
 
     const orderId = limitOrderResponse.orderId;
 
-    // Step 4: Wait for 10 seconds
-    console.log('Waiting for 10 seconds to check order status...');
-    await new Promise(resolve => setTimeout(resolve, 10000));
+    // Step 4: Wait for some delay seconds
+    console.log('Waiting for 2 seconds to check order status...');
+    //await new Promise(resolve => setTimeout(resolve, 10000));
+    await delayFunction()
+    console.log('Waited for 2 seconds...');
 
     // Step 5: Check the order status
     const orderStatus = await checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, orderId);
@@ -119,16 +107,12 @@ module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol,
 
 // Function to get the current order book depth
 async function getOrderBookDepth(endpointBaseUrl, symbol) {
-    console.log('inside getOrderBookDepth');
     const BINANCE_TESTNET_API_URL = endpointBaseUrl + '/api/v3/depth';
 
     try {
-        console.log('getOrderBookDepth params ', BINANCE_TESTNET_API_URL, symbol);
         const response = await axios.get(BINANCE_TESTNET_API_URL, {
             params: { symbol: symbol.toUpperCase() }
         });
-
-        console.log('getOrderBookDepth res ', response);
 
         const { bids, asks } = response.data;
         const bestBid = bids[0]; // Highest buy order
@@ -295,6 +279,10 @@ async function placeMarketOrder(apiKey, apiSecret, endpointOrderUrl, symbol, qua
         console.error('Error placing market order:', error.response ? error.response.data : error.message);
         return null;
     }
+}
+
+async function delayFunction() {
+    await new Promise(resolve => setTimeout(resolve, 2000));
 }
 
 
