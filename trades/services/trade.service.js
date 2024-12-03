@@ -3,6 +3,20 @@ const axios = require('axios');
 const crypto = require('crypto');
 
 const queries = {
+    GET_TRADE_SIGNAL: `SELECT SIGNAL_ID,
+                            PLATFORM,
+                            CLIENT_ID_CODE,
+                            CLIENT_EMAIL,
+                            TRADE_TIMEFRAME,
+                            BASE_CURRENCY_CODE,
+                            TOKEN_CURRENCY_CODE,
+                            TRADE_SYMBOL,
+                            ALLOW_SIMULATION_FLAG,
+                            TRADE_ACTION,
+                            CLOSE_PRICE
+                        FROM DBD_TBL_TRADE_SIGNALS
+                        WHERE EXECUTION_STATUS = 1;`,
+
     GET_SIGNAL_INPUT: `select 
                             botProfile.BOT_ID, 
                             botProfile.BOT_SYMBOL, 
@@ -22,11 +36,59 @@ const queries = {
                         and botProfile.BOT_EXCHANGE = ? and upper(botProfile.BOT_TIMEFRAME) = upper(?)
                         and authProfile.EMAIL_ID = userSubscribed.EMAIL_ID and authProfile.STATUS = 1
                         order by userSubscribed.EMAIL_ID;`,
-    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-};
+                        
+    INSERT_TRADE_DATA: 'INSERT INTO DBD_TBL_TRADE_CONFIRMATION(EMAIL_ID,TRADE_SYMBOL,BOT_EXCHANGE,TRADE_TIMEFRAME,BOT_NAME,ENDPOINT_URL,TRADE_SLIPPAGE, TRADE_QUANTITY, TRADE_ACTION, TICKER_PRICE, TRADE_CONFIRMATION_JSON, TRADE_STATUS, ORDER_ID, ORDER_TYPE, API_KEY, API_SECRET) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+
+    GET_TRADE_COINFIRMATION_DATA: `SELECT TRADE_ID,
+                                    EMAIL_ID,
+                                    TRADE_SYMBOL,
+                                    BOT_EXCHANGE,
+                                    TRADE_TIMEFRAME,
+                                    BOT_NAME,
+                                    ENDPOINT_URL,
+                                    TRADE_SLIPPAGE,
+                                    TRADE_QUANTITY,
+                                    TRADE_ACTION,
+                                    TICKER_PRICE,
+                                    TRADE_CONFIRMATION_JSON,
+                                    TRADE_STATUS,
+                                    ORDER_ID,
+                                    ORDER_TYPE,
+                                    API_KEY,
+                                    API_SECRET
+                                FROM DBD_TBL_TRADE_CONFIRMATION
+                                WHERE TRADE_STATUS = 1`,
+
+    UPDATE_TRADE_CONFIRMATION: `UPDATE DBD_TBL_TRADE_CONFIRMATION
+                                SET TICKER_PRICE = ?,
+                                    TRADE_CONFIRMATION_JSON = ?,
+                                    TRADE_STATUS = ?,
+                                    ORDER_ID = ?,
+                                    ORDER_TYPE = ?
+                                WHERE TRADE_ID = ?;`,
+
+    UPDATE_TRADE_STATUS: `UPDATE DBD_TBL_TRADE_CONFIRMATION
+                            SET TICKER_PRICE = ?,
+                                TRADE_CONFIRMATION_JSON = ?,
+                                TRADE_STATUS = ?,
+                                ORDER_ID = ?,
+                                ORDER_TYPE = ?
+                            WHERE TRADE_ID = ?;`
+    };
+
+module.exports.getTradeSignal = async () => {
+    const [record] = await db.query(queries.GET_TRADE_SIGNAL)
+    return record;
+}
+
 
 module.exports.getSignalInput = async (tradeAction, tradeSymbol, platform, tradeTimeframe) => {
     const [record] = await db.query(queries.GET_SIGNAL_INPUT, [tradeAction, tradeSymbol, platform, tradeTimeframe])
+    return record;
+}
+
+module.exports.getTradeConfirmationData = async () => {
+    const [record] = await db.query(queries.GET_TRADE_COINFIRMATION_DATA)
     return record;
 }
 
@@ -34,12 +96,20 @@ module.exports.addTradeData = async (tradeObj) => {
     const [record] = await db.query(queries.INSERT_TRADE_DATA,
         [tradeObj.emailId, tradeObj.botSymbol, tradeObj.botExchange, tradeObj.botTimeframe, tradeObj.botName, 
         tradeObj.endpointURL, tradeObj.tradeSlippage, tradeObj.tradeQuantity, tradeObj.tradeAction,
-        tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, tradeObj.orderType])
+        tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, tradeObj.orderId, 
+        tradeObj.orderType, tradeObj.apiKey, tradeObj.apiSecret])
     return record;
 }
 
-// Main function to execute trade
-module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction) => {
+module.exports.updateTradeConfirmation = async (tradeObj) => {
+    const [record] = await db.query(queries.UPDATE_TRADE_CONFIRMATION,
+        [tradeObj.tickerPrice, tradeObj.tradeConfirmationJSON, tradeObj.tradeStatus, 
+        tradeObj.orderId, tradeObj.orderType, tradeObj.tradeId])
+    return record;
+}
+
+// Main function to execute limit trade
+module.exports.executeLimitTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction) => {
     console.log('inside executeTrade ===> ', apiKey, apiSecret, endpointBaseUrl, symbol, quantity, tradeAction);
 
     // Step 1: Get the current order book depth
@@ -78,30 +148,28 @@ module.exports.executeTrade = async (apiKey, apiSecret, endpointBaseUrl, symbol,
 
     // Step 3: Place a limit order
     const limitOrderResponse = await placeLimitOrder(apiKey, apiSecret, endpointOrderUrl, symbol, quantity, roundedLimitPrice, side);
-    if (!limitOrderResponse) return; // Exit if the limit order failed
+    return limitOrderResponse; // Returning limit order response
+}
 
-    const orderId = limitOrderResponse.orderId;
-
-    // Step 4: Wait for some delay seconds
-    console.log('Waiting for 2 seconds to check order status...');
-    //await new Promise(resolve => setTimeout(resolve, 10000));
-    await delayFunction()
-    console.log('Waited for 2 seconds...');
+// Main function to execute market trade
+module.exports.checkAndExecuteMarketOrder = async (apiKey, apiSecret, endpointUrl, symbol, quantity, tradeAction, orderId) => {
+    console.log('inside checkAndExecuteMarketOrder ===> ', apiKey, apiSecret, endpointUrl, symbol, quantity, tradeAction, orderId);
 
     // Step 5: Check the order status
-    const orderStatus = await checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, orderId);
+    const orderStatus = await checkOrderStatus(apiKey, apiSecret, endpointUrl, symbol, orderId);
+    console.log('## orderStatus: ', orderStatus);
     if (!orderStatus) return; // Exit if there was an error checking the order status
 
     // Step 6: If the order is not filled, cancel it and place a market order
     if (orderStatus.status === 'NEW') {
         console.log('Limit order not filled, cancelling the order...');
-        await cancelOrder(apiKey, apiSecret, endpointOrderUrl, symbol, orderId);
+        await cancelOrder(apiKey, apiSecret, endpointUrl, symbol, orderId);
         console.log('Placing a market order...');
-        const markerOrderResponse = await placeMarketOrder(apiKey, apiSecret, endpointOrderUrl, symbol, quantity, side);
+        const markerOrderResponse = await placeMarketOrder(apiKey, apiSecret, endpointUrl, symbol, quantity, side);
         return markerOrderResponse;
     } else {
         console.log('Limit order filled, no action needed.');
-        return limitOrderResponse;
+        return orderStatus;
     }
 }
 
@@ -220,7 +288,7 @@ async function checkOrderStatus(apiKey, apiSecret, endpointOrderUrl, symbol, ord
 
 // Function to cancel an order
 async function cancelOrder(apiKey, apiSecret, endpointOrderUrl, symbol, orderId) {
-    console.log('inside checkOrderStatus')
+    console.log('inside cancelOrder')
     const timestamp = Date.now();
     const queryString = `symbol=${symbol}&orderId=${orderId}&timestamp=${timestamp}`;
 
@@ -282,7 +350,7 @@ async function placeMarketOrder(apiKey, apiSecret, endpointOrderUrl, symbol, qua
 }
 
 async function delayFunction() {
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 10000));
 }
 
 
