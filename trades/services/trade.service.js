@@ -165,7 +165,7 @@ module.exports.checkAndExecuteMarketOrder = async (apiKey, apiSecret, endpointUr
         console.log('Limit order not filled, cancelling the order...');
         await cancelOrder(apiKey, apiSecret, endpointUrl, symbol, orderId);
         console.log('Placing a market order...');
-        const markerOrderResponse = await placeMarketOrder(apiKey, apiSecret, endpointUrl, symbol, quantity, side);
+        const markerOrderResponse = await placeMarketOrder(apiKey, apiSecret, endpointUrl, symbol, quantity, tradeAction);
         return markerOrderResponse;
     } else {
         console.log('Limit order filled, no action needed.');
